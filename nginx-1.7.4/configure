@@ -7,26 +7,39 @@
 LC_ALL=C
 export LC_ALL
 
+# 处理configure命令的参数
+# 定义后续处理将要用到的变量，并且根据参数及默认值设置变量值
 . auto/options
+# 初始化后续将要用到的文件路径
 . auto/init
+# 分析nginx的源码结构
 . auto/sources
 
+# 编译过程中所有目标文件的生产路径有--builddir=DIR参数指定
+# 默认为<nginx-source>/objs目录
 test -d $NGX_OBJS || mkdir $NGX_OBJS
 
+# 创建必要的编译文件
+# ngx_auto_headers.h
+# autoconf.err
 echo > $NGX_AUTO_HEADERS_H
 echo > $NGX_AUTOCONF_ERR
 
+# 向objs/ngx_auto_config.h文件写入命令行参数
 echo "#define NGX_CONFIGURE \"$NGX_CONFIGURE\"" > $NGX_AUTO_CONFIG_H
 
-
+# DEBUG模式
+# 向objs/ngx_auto_config.h文件写入DEBUG宏
 if [ $NGX_DEBUG = YES ]; then
     have=NGX_DEBUG . auto/have
 fi
 
+# dtrace动态跟踪
 if [ $NGX_DTRACE = YES ]; then
     have=NGX_DTRACE . auto/have
 fi
 
+# 检查操作系统参数是否支持nginx编译
 if test -z "$NGX_PLATFORM"; then
     echo "checking for OS"
 
@@ -49,21 +62,33 @@ else
     NGX_SYSTEM=$NGX_PLATFORM
 fi
 
+# 检查并设置CC编译器
 . auto/cc/conf
 
+# 对非windows操作系统定义必要的头文件并检查是否支持
 if [ "$NGX_PLATFORM" != win32 ]; then
     . auto/headers
 fi
 
+# 定义操作系统相关的方法并检查是否支持
 . auto/os/conf
 
+# 定义类unix操作系统的方法并检查是否支持
 if [ "$NGX_PLATFORM" != win32 ]; then
     . auto/unix
 fi
 
+# 最核心的构造运行期modules脚本
+# 生产ngx_modules.c文件，用于编译nginx
+# ngx_modules.c定义了ngx_modules数组
+# ngx_modules指明了nginx运行期间有哪些模块参与到请求处理中，对数组元素的顺序非常敏感
+# 在--add-modules=参数里加入的第三方模块也在此步骤写入到ngx_modules.c文件中
 . auto/modules
+
+# 检查nginx在链接期间使用到的静态库、动态库及目标文件是否存在
 . auto/lib/conf
 
+# nginx安装路径
 case ".$NGX_PREFIX" in
     .)
         NGX_PREFIX=${NGX_PREFIX:-/usr/local/nginx}
@@ -79,10 +104,12 @@ case ".$NGX_PREFIX" in
     ;;
 esac
 
+# nginx配置文件路径
 if [ ".$NGX_CONF_PREFIX" != "." ]; then
     have=NGX_CONF_PREFIX value="\"$NGX_CONF_PREFIX/\"" . auto/define
 fi
 
+# nginx的sbin/config/pid/locl/error_log等文件路径
 have=NGX_SBIN_PATH value="\"$NGX_SBIN_PATH\"" . auto/define
 have=NGX_CONF_PATH value="\"$NGX_CONF_PATH\"" . auto/define
 have=NGX_PID_PATH value="\"$NGX_PID_PATH\"" . auto/define
@@ -101,13 +128,19 @@ have=NGX_HTTP_UWSGI_TEMP_PATH value="\"$NGX_HTTP_UWSGI_TEMP_PATH\""
 have=NGX_HTTP_SCGI_TEMP_PATH value="\"$NGX_HTTP_SCGI_TEMP_PATH\""
 . auto/define
 
+# 创建Makefile文件
 . auto/make
+# 向Makefile文件加入静态库、动态库及目标文件配置
 . auto/lib/make
+# 向Makefile文件加入install功能配置
 . auto/install
 
 # STUB
+# 在ngx_auto_config.h文件中指定NGX_SUPPRESS_WARN宏、NGX_SMP宏
 . auto/stubs
 
+# ngx_auto_config.h文件中指定NGX_USER和NGX_GROUP宏
+# 如果在configure没有制定参数，默认使用nobody
 have=NGX_USER value="\"$NGX_USER\"" . auto/define
 have=NGX_GROUP value="\"$NGX_GROUP\"" . auto/define
 
@@ -115,4 +148,5 @@ if [ ".$NGX_BUILD" != "." ]; then
     have=NGX_BUILD value="\"$NGX_BUILD\"" . auto/define
 fi
 
+# 显示执行结果
 . auto/summary

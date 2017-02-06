@@ -170,8 +170,13 @@ typedef struct {
 
 
 typedef struct {
+    /* 所有解析过的HTTP头部都在headers链表中 */
     ngx_list_t                        headers;
 
+    /* RFC1616规范中定义的HTTP头部
+     * 指向headers链表中的相应成员
+     * NULL表示没有解析到相应的HTTP头部
+     * */
     ngx_table_elt_t                  *host;
     ngx_table_elt_t                  *connection;
     ngx_table_elt_t                  *if_modified_since;
@@ -219,16 +224,23 @@ typedef struct {
     ngx_table_elt_t                  *date;
 #endif
 
+    /* ngx_http_auth_basic_module模块使用的成员 */
     ngx_str_t                         user;
     ngx_str_t                         passwd;
 
     ngx_array_t                       cookies;
 
     ngx_str_t                         server;
+    /* 根据ngx_table_elt_t *content_length计算的HTTP包体大小 */
     off_t                             content_length_n;
     time_t                            keep_alive_n;
 
+    /* HTTP连接类型 
+     * 取值：0, NGX_http_CONNECTION_CLOSE, NGX_HTTP_CONNECTION_KEEP_ALIVE
+     * */
     unsigned                          connection_type:2;
+
+    /* HTTP框架根据UserAgent判断的浏览器类型 */
     unsigned                          chunked:1;
     unsigned                          msie:1;
     unsigned                          msie6:1;

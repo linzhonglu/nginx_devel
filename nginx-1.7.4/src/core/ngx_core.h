@@ -25,12 +25,15 @@ typedef struct ngx_connection_s  ngx_connection_t;
 typedef void (*ngx_event_handler_pt)(ngx_event_t *ev);
 typedef void (*ngx_connection_handler_pt)(ngx_connection_t *c);
 
-
+/* 表示成功，Nginx将会继续执行请求的后续动作 */
 #define  NGX_OK          0
+/* 表示错误，会调用ngx_http_terminate_request终止请求 */
 #define  NGX_ERROR      -1
 #define  NGX_AGAIN      -2
 #define  NGX_BUSY       -3
+/* 表示到此为止，同时HTTP框架将暂时不在继续执行这个请求的后续部分 */
 #define  NGX_DONE       -4
+/* 继续在NGX_HTTP_CONTENT_PHASE阶段寻找下一个对于该请求感兴趣的HTTP模块来再次处理这个请求 */
 #define  NGX_DECLINED   -5
 #define  NGX_ABORT      -6
 
