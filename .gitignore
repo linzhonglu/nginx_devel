@@ -1,3 +1,15 @@
 /nginx-1.7.4/workspace
 /nginx-1.7.4/objs/
 /nginx-1.7.4/Makefile
+
+
+/nginx-1.7.4/nginx.IAB
+/nginx-1.7.4/nginx.IAD
+/nginx-1.7.4/nginx.IMB
+/nginx-1.7.4/nginx.IMD
+/nginx-1.7.4/nginx.PFI
+/nginx-1.7.4/nginx.PO
+/nginx-1.7.4/nginx.PR
+/nginx-1.7.4/nginx.PRI
+/nginx-1.7.4/nginx.PS
+/nginx-1.7.4/nginx.WK3
