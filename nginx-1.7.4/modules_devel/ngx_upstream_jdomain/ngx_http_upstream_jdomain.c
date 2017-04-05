@@ -12,12 +12,12 @@
 #define NGX_JDOMAIN_STATS_WAIT 1
 
 typedef struct {
-	struct sockaddr	sockaddr;
-	struct sockaddr_in6	padding;
+	struct sockaddr	sockaddr; /* IPV4 */
+	struct sockaddr_in6	padding;  /* IPV6 */
 
-	socklen_t	socklen;
+	socklen_t	socklen; /* socket len */
 
-	ngx_str_t	name;
+	ngx_str_t	name;  /* hostname */
 	u_char		ipstr[NGX_SOCKADDR_STRLEN + 1];
 
 #if (NGX_HTTP_SSL)
@@ -75,6 +75,7 @@ static void ngx_http_upstream_jdomain_free_peer(ngx_peer_connection_t *pc,
 
 static void ngx_http_upstream_jdomain_handler(ngx_resolver_ctx_t *ctx);
 
+// 配置文件nginx命令定义
 static ngx_command_t  ngx_http_upstream_jdomain_commands[] = {
 	{ngx_string("jdomain"),
 	 NGX_HTTP_UPS_CONF|NGX_CONF_1MORE,
@@ -86,7 +87,7 @@ static ngx_command_t  ngx_http_upstream_jdomain_commands[] = {
 	 ngx_null_command
 };
 
-
+// HTTP框架context定义
 static ngx_http_module_t  ngx_http_upstream_jdomain_module_ctx = {
 	NULL,						/* preconfiguration */
 	NULL,						/* postconfiguration */
@@ -101,7 +102,7 @@ static ngx_http_module_t  ngx_http_upstream_jdomain_module_ctx = {
 	NULL						/* merge location configuration */
 };
 
-
+// nginx模块定义
 ngx_module_t  ngx_http_upstream_jdomain_module = {
 	NGX_MODULE_V1,
 	&ngx_http_upstream_jdomain_module_ctx,		/* module context */
@@ -256,6 +257,9 @@ ngx_http_upstream_jdomain_free_peer(ngx_peer_connection_t *pc, void *data,ngx_ui
 		pc->tries--;
 }
 
+/*
+ * nginx命令处理函数
+ */
 static char *
 ngx_http_upstream_jdomain(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {

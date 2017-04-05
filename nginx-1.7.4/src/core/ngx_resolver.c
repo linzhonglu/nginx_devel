@@ -53,6 +53,7 @@ ngx_int_t ngx_udp_connect(ngx_udp_connection_t *uc);
 
 static void ngx_resolver_cleanup(void *data);
 static void ngx_resolver_cleanup_tree(ngx_resolver_t *r, ngx_rbtree_t *tree);
+
 static ngx_int_t ngx_resolve_name_locked(ngx_resolver_t *r,
     ngx_resolver_ctx_t *ctx);
 static void ngx_resolver_expire(ngx_resolver_t *r, ngx_rbtree_t *tree,
@@ -242,6 +243,9 @@ ngx_resolver_create(ngx_conf_t *cf, ngx_str_t *names, ngx_uint_t n)
 }
 
 
+/*
+ * 释放ngx_resolver_t资源
+ */
 static void
 ngx_resolver_cleanup(void *data)
 {
@@ -280,6 +284,9 @@ ngx_resolver_cleanup(void *data)
 }
 
 
+/*
+ * 释放红黑树资源
+ */
 static void
 ngx_resolver_cleanup_tree(ngx_resolver_t *r, ngx_rbtree_t *tree)
 {
@@ -3032,23 +3039,27 @@ ngx_udp_connect(ngx_udp_connection_t *uc)
 {
     int                rc;
     ngx_int_t          event;
-    ngx_event_t       *rev, *wev;
-    ngx_socket_t       s;
+    ngx_event_t       *rev, *wev; //读事件，写事件
+    ngx_socket_t       s;   //socket描述符
     ngx_connection_t  *c;
 
+    //获取socket描述符
     s = ngx_socket(uc->sockaddr->sa_family, SOCK_DGRAM, 0);
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, &uc->log, 0, "UDP socket %d", s);
 
     if (s == (ngx_socket_t) -1) {
+        //socket描述符获取失败, 返回错误码
         ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
                       ngx_socket_n " failed");
         return NGX_ERROR;
     }
 
+    //连接UDP-DNS服务器
     c = ngx_get_connection(s, &uc->log);
 
     if (c == NULL) {
+        //连接UDP-DNS服务器失败
         if (ngx_close_socket(s) == -1) {
             ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
                           ngx_close_socket_n "failed");
@@ -3057,6 +3068,7 @@ ngx_udp_connect(ngx_udp_connection_t *uc)
         return NGX_ERROR;
     }
 
+    //设置UDP为非阻塞模式
     if (ngx_nonblocking(s) == -1) {
         ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
                       ngx_nonblocking_n " failed");
