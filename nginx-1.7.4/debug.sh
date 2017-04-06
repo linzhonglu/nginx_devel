@@ -3,13 +3,15 @@
 _PWD=`pwd`
 _WORKSPACE=$_PWD/workspace
 _EXEC=$_WORKSPACE/sbin/nginx
-_CONF=$_WORKSPACE/conf/nginx.conf
+_CONF=$_WORKSPACE/conf/nginx_debug.conf
 mkdir -p $_WORKSPACE
 
 _configure() {
     . $_PWD/configure \
         --with-debug \
-        --prefix=$_WORKSPACE
+        --prefix=$_WORKSPACE \
+        --add-module=$_PWD/modules_devel/ngx_upstream_jdomain \
+        --add-module=$_PWD/modules_devel/ngx_http_lzler_module
 }
 
 _makefile() {
@@ -19,11 +21,12 @@ _makefile() {
 _install() {
     make install
     sudo setcap CAP_NET_BIND_SERVICE=+ep $_EXEC
+    cp $_PWD/nginx.conf $_CONF
 }
 
 ############
 _start() {
-    $_EXEC -p $_WORKSPACE -c $_CONF
+    echo $"$_EXEC -p $_WORKSPACE -c $_CONF"
 }
 
 _reload() {
