@@ -75,12 +75,15 @@
 #define NGX_MAX_CONF_ERRSTR  1024
 
 
+/*
+ * 配置项结构体
+ */
 struct ngx_command_s {
-    ngx_str_t             name;
-    ngx_uint_t            type;
-    char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-    ngx_uint_t            conf;
-    ngx_uint_t            offset;
+    ngx_str_t             name;     /* 配置项名称 */
+    ngx_uint_t            type;     /* 配置项可以在哪些块(http/server/location/if/upstream)中出现以及可以携带的参数类型和个数等*/
+    char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);    /* 解析配置项的回调方法 */
+    ngx_uint_t            conf;     /* 配置项所处内存的相对偏移量，仅在type中没有设置NGX_DIRECT_CONF和NGX_MAIN_CONF时才会生效*/
+    ngx_uint_t            offset;   /* 配置项在整个配置项的结构体中的偏移位置 */
     void                 *post;
 };
 
@@ -98,7 +101,9 @@ struct ngx_open_file_s {
 
 #define NGX_MODULE_V1          0, 0, 0, 0, 0, 0, 1
 #define NGX_MODULE_V1_PADDING  0, 0, 0, 0, 0, 0, 0, 0
-
+/*
+ * nginx模块结构体
+ */
 struct ngx_module_s {
     ngx_uint_t            ctx_index;
     ngx_uint_t            index;
@@ -317,19 +322,30 @@ ngx_open_file_t *ngx_conf_open_file(ngx_cycle_t *cycle, ngx_str_t *name);
 void ngx_cdecl ngx_conf_log_error(ngx_uint_t level, ngx_conf_t *cf,
     ngx_err_t err, const char *fmt, ...);
 
-
+/* 配置项的参数时on或者off，而且在nginx模块的代码中使用ngx_flag_t变量来保存配置项参数 */
 char *ngx_conf_set_flag_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/* 配置项后只有一个参数，而且使用ngx_str_t类型的变量来保存配置项参数 */
 char *ngx_conf_set_str_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/* 配置项会出现多次，每个配置项后面都跟着一个参数，而且使用ngx_array_t动态数组存储所有参数且数组中每个成员使用ngx_str_t类型变量存储 */
 char *ngx_conf_set_str_array_slot(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
+/*  */
 char *ngx_conf_set_keyval_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/* 配置项后必须携带一个参数，且类型必须为整型 */
 char *ngx_conf_set_num_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/*  */
 char *ngx_conf_set_size_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/*  */
 char *ngx_conf_set_off_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/*  */
 char *ngx_conf_set_msec_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/*  */
 char *ngx_conf_set_sec_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/*  */
 char *ngx_conf_set_bufs_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/*  */
 char *ngx_conf_set_enum_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+/*  */
 char *ngx_conf_set_bitmask_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
